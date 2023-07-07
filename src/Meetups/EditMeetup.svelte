@@ -1,5 +1,5 @@
 <script>
-    import meetups from "./meetupStore.js";
+    import customMeetupStore from "./meetupStore.js"
     import { createEventDispatcher } from "svelte";
     import TextInput from "../UI/TextInput.svelte";
     import Button from "../UI/Button.svelte";
@@ -8,14 +8,29 @@
 
     const dispatch = createEventDispatcher();
 
+    export let id = null;
+
+    
     let title = '';
     let subtitle = '';
     let description = '';
     let imageUrl = '';
     let address = '';
     let contactEmail = '';
-
-
+    
+    if (id) {
+        const unsubscribe = customMeetupStore.subscribe(items => {
+            const selectedMeetup = items.find(i => i.id === id);
+            title = selectedMeetup.title;
+            subtitle = selectedMeetup.subtitle;
+            description = selectedMeetup.description;
+            imageUrl = selectedMeetup.imageUrl;
+            address = selectedMeetup.address;
+            contactEmail = selectedMeetup.contactEmail;
+        })
+        unsubscribe();
+    }
+    
     $: titleValid = !isEmpty(title);
     $: subtitleValid = !isEmpty(subtitle);
     $: descriptionValid = !isEmpty(description);
@@ -33,11 +48,22 @@
             address: address,
             contactEmail: contactEmail,
         };
-        meetups.addMeetup(meetupData);
+
+        if (id) {
+            // meetups.updateMeetup(id, meetupData);
+            customMeetupStore.updateMeetup(id, meetupData);
+        }else{
+            // meetups.addMeetup(meetupData);
+            customMeetupStore.addMeetup(meetupData);
+        }
         dispatch('save');
     }
     function cancel() {
         dispatch('cancel');
+    }
+    function deleteMeetup() {
+        customMeetupStore.removeMeetup(id);
+        dispatch('save');
     }
 
 </script>
@@ -67,7 +93,7 @@
             id="description" 
             label="Description" 
             controlType="textarea"
-            bindvalue = {description} 
+            value = {description} 
             valid = {descriptionValid}
             validityMessage="Please enter a valid Description"  
             on:input={event => description = event.target.value}/>
@@ -95,5 +121,9 @@
             on:input={event => contactEmail = event.target.value}/>
         <Button type="button" mode = "outline" on:click={cancel} slot="footer" >Cancel</Button>
         <Button type="submit" slot="footer" disabled={!formIsValid}>Save</Button>
+        {#if id}
+            <Button type="button" on:click={deleteMeetup}>Delete</Button>
+            
+        {/if}    
     </form>
 </Modal>

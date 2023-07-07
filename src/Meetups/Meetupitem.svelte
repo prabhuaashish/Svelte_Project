@@ -74,7 +74,7 @@
     </div>
     <footer>
         <p>{address}</p>
-        <Button href="mailto:{contactEmail}">Contact</Button>
+        <Button mode='outline' type='button' on:click={()=> dispatch('edit',id)} >Edit</Button>
         <Button type="button" on:click={() => dispatch('showdetails', id)}>Show Details</Button>
         <Button mode="outline" buttoncolor={isFav ? null : 'success'} 
             type="button" 
