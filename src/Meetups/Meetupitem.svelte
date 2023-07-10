@@ -4,7 +4,7 @@
     import Button from "../UI/Button.svelte";
     import Badge from '../UI/Badge.svelte';
     export let id, title, subtitle, description, 
-            imageUrl, address, contactEmail, isFav;
+            imageUrl, address, isFav;
 
     function togglefavorite() {
         meetups.toggleFavourite(id);
