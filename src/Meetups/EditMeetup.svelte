@@ -50,11 +50,39 @@
         };
 
         if (id) {
-            // meetups.updateMeetup(id, meetupData);
-            customMeetupStore.updateMeetup(id, meetupData);
+            fetch(`https://svelte-project-8d391-default-rtdb.firebaseio.com/meetups/${id}.json`, {
+                method: 'PATCH', 
+                body: JSON.stringify(meetupData),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => {
+                if(!res.ok){
+                    throw new Error('an error occured');
+                }
+                customMeetupStore.updateMeetup(id, meetupData);
+            }).catch(err => {
+                console.log(err);
+            })
         }else{
-            // meetups.addMeetup(meetupData);
-            customMeetupStore.addMeetup(meetupData);
+            fetch("https://svelte-project-8d391-default-rtdb.firebaseio.com/meetups.json", {
+                method: 'POST',
+                body: JSON.stringify({...meetupData, isFavourite: false}),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(res => {
+                if(!res.ok){
+                    throw new Error('an error occured');
+                }
+                return res.json();
+            })
+            .then(data => {
+                customMeetupStore.addMeetup({...meetupData, isFavourite:false, id: data.name});
+            })
+            .catch(err => {
+                console.log(err);
+            })      
         }
         dispatch('save');
     }
@@ -62,6 +90,15 @@
         dispatch('cancel');
     }
     function deleteMeetup() {
+        fetch(`https://svelte-project-8d391-default-rtdb.firebaseio.com/meetups/${id}.json`, {
+            method: 'DELETE'
+        }).then(res => {
+            if(!res.ok){
+                throw new Error('An error occured');
+            }
+        }).catch(err => {
+            
+        })
         customMeetupStore.removeMeetup(id);
         dispatch('save');
     }

@@ -5,9 +5,29 @@
     import Badge from '../UI/Badge.svelte';
     export let id, title, subtitle, description, 
             imageUrl, address, isFav;
+            
+    let isLoading = false;
 
     function togglefavorite() {
-        meetups.toggleFavourite(id);
+        isLoading = true;
+        fetch(`https://svelte-project-8d391-default-rtdb.firebaseio.com/meetups/${id}.json`, {
+            method: 'PATCH',
+            body: JSON.stringify({
+                isFavourite: !isFav
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(res => {
+            if(!res.ok){
+                throw new Error('An error occured');
+            }
+            isLoading = false;
+            meetups.toggleFavourite(id);
+        }).catch(err => {
+            isLoading = false;
+            console.log(err);
+        })
     }
 
     const dispatch = createEventDispatcher();
@@ -76,11 +96,10 @@
         <p>{address}</p>
         <Button mode='outline' type='button' on:click={()=> dispatch('edit',id)} >Edit</Button>
         <Button type="button" on:click={() => dispatch('showdetails', id)}>Show Details</Button>
-        <Button mode="outline" buttoncolor={isFav ? null : 'success'} 
-            type="button" 
-            on:click="{togglefavorite}">
+            <Button mode="outline" buttoncolor={isFav ? null : 'success'} 
+                type="button" 
+                on:click="{togglefavorite}">
                 {isFav? "Unfavorite" : "Favorite"}
             </Button>
-        
     </footer>
 </article>
